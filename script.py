@@ -1,6 +1,7 @@
 import cv2
 import os
 import time
+from datetime import datetime
 
 def capture_image(resolution, num_photos, time_delay):
     # Initialize the camera
@@ -10,7 +11,7 @@ def capture_image(resolution, num_photos, time_delay):
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, resolution[0])
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution[1])
 
-    # Ruta completa al directorio del escritorio
+    # Full path to desktop directory
     desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop', 'images')
 
     # Create a folder to save the images
@@ -22,31 +23,37 @@ def capture_image(resolution, num_photos, time_delay):
         # Capture a frame
         ret, frame = cap.read()
 
-        # Guardar el frame como una imagen
-        image_path = os.path.join(desktop_path, f'image_{i}.jpg')
+        # Get the current date and time in ISO 8601 format
+        timestamp = datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
+
+        # Build file name
+        file_name = f'image_{timestamp}.jpg'
+        image_path = os.path.join(desktop_path, file_name)
+
+        # Save the frame as an image
         cv2.imwrite(image_path, frame)
 
-        # Mostrar el frame
+        # Show the frame
         cv2.imshow('Frame', frame)
 
-        # Esperar el tiempo especificado
+        # Wait the specified time
         time.sleep(time_delay)
 
-        # Romper el bucle si se presiona la tecla 'q'
+        # Break loop if 'q' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # Liberar la cámara y cerrar la ventana
+    # Release the camera and close the window
     cap.release()
     cv2.destroyAllWindows()
 
 def main():
-    # Obtener la resolución, número de fotos y tiempo de espera del usuario
+    # Get the user's resolution, number of photos and waiting time
     resolution = (1080, 720)
     num_photos = int(input("Ingresa el número de fotos que deseas tomar: "))
     time_delay = float(input("Ingresa el tiempo de espera en segundos entre fotos: "))
 
-    # Capturar las imágenes
+    # Capture the images
     capture_image(resolution, num_photos, time_delay)
 
 if __name__ == "__main__":
