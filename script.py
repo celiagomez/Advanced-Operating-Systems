@@ -18,6 +18,7 @@ def capture_image(resolution, num_photos, time_delay):
     if not os.path.exists(desktop_path):
         os.makedirs(desktop_path)
 
+
     # Capture the specified number of photos
     for i in range(num_photos):
         # Capture a frame
@@ -31,7 +32,11 @@ def capture_image(resolution, num_photos, time_delay):
         image_path = os.path.join(desktop_path, file_name)
 
         # Save the frame as an image
-        cv2.imwrite(image_path, frame)
+        try:
+            cv2.imwrite(image_path, frame)
+        except Exception as e:
+            print(f'Error saving image: {e}')
+            return
 
         # Show the frame
         cv2.imshow('Frame', frame)
@@ -50,8 +55,8 @@ def capture_image(resolution, num_photos, time_delay):
 def main():
     # Get the user's resolution, number of photos and waiting time
     resolution = (1080, 720)
-    num_photos = int(input("Ingresa el número de fotos que deseas tomar: "))
-    time_delay = float(input("Ingresa el tiempo de espera en segundos entre fotos: "))
+    num_photos = int(input("Enter the number of photos you want to take: "))
+    time_delay = float(input("Enter the wait time in seconds between photos: "))
 
     # Capture the images
     capture_image(resolution, num_photos, time_delay)
