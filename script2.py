@@ -4,6 +4,8 @@ import time
 from datetime import datetime
 from fpdf import FPDF
 import schedule
+import logging
+from logging.handlers import RotatingFileHandler
 
 LOG_MAX_LINES = 1500
 LOG_ROTATION_LIMIT = 5
@@ -49,7 +51,36 @@ def save_image(image_path, frame, image_format):
             pdf.output(image_path)
             os.remove(temp_image_path)
     except Exception as e:
-        print(f'Error saving image: {e}')
+        log(f'Error saving image: {e}')
+
+def setup_logging(log_directory):
+    # Create logs directory if it doesn't exist
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+    
+    # Set up logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger()
+    
+    # Configure rotating file handler for logging
+    log_file_path = os.path.join(log_directory, 'log.log')
+    handler = RotatingFileHandler(log_file_path, maxBytes=1000000, backupCount=5)  # Rotate at 1 MB with max 5 backups
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+def log(message):
+    # Get the directory of the script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    log_directory = os.path.join(script_dir, 'logs')
+    
+    # Set up logging if not already configured
+    if not getattr(log, 'configured', False):
+        setup_logging(log_directory)
+        log.configured = True
+    
+    # Log the message
+    logging.info(message)
 
 def rotate_logs(log_directory):
     # Get list of log files in the directory
@@ -68,20 +99,6 @@ def rotate_logs(log_directory):
     # Rename current log to log_1.log
     if os.path.exists(os.path.join(log_directory, "log.log")):
         os.rename(os.path.join(log_directory, "log.log"), os.path.join(log_directory, "log_1.log"))
-
-def log(message):
-
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    log_directory = os.path.join(script_dir, 'logs')
-
-    # Rotate logs if necessary
-    if not os.path.exists(log_directory):
-        os.makedirs(log_directory)
-    rotate_logs(log_directory)
-
-    # Write to current log file
-    with open(os.path.join(log_directory, "log.log"), "a") as log_file:
-        log_file.write(f"{datetime.now().isoformat()} - {message}\n")
 
 def capture_image(resolution_choice, num_photos, time_delay, image_format):
     # Initialize the camera
