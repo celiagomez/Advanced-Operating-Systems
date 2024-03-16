@@ -4,6 +4,9 @@ import time
 from datetime import datetime
 from fpdf import FPDF
 
+LOG_MAX_LINES = 1500
+LOG_ROTATION_LIMIT = 5
+
 def initialize_camera(resolution_choice):
     # Initialize the camera
     cap = cv2.VideoCapture(0)
@@ -13,9 +16,6 @@ def initialize_camera(resolution_choice):
         resolution = (1080, 800)
     elif resolution_choice == 2:
         resolution = (600, 600)
-    else:
-        print("Invalid resolution choice. Defaulting to (1080, 800).")
-        resolution = (1080, 800)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, resolution[0])
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution[1])
 
@@ -49,7 +49,38 @@ def save_image(image_path, frame, image_format):
             os.remove(temp_image_path)
     except Exception as e:
         print(f'Error saving image: {e}')
+        
+def rotate_logs(log_directory):
+    # Get list of log files in the directory
+    log_files = sorted([f for f in os.listdir(log_directory) if f.endswith('.log')], reverse=True)
 
+    # Remove excess log files if more than LOG_ROTATION_LIMIT
+    if len(log_files) > LOG_ROTATION_LIMIT:
+        for file_to_remove in log_files[LOG_ROTATION_LIMIT:]:
+            os.remove(os.path.join(log_directory, file_to_remove))
+
+    # Rename log files to make space for a new log
+    for i in range(LOG_ROTATION_LIMIT - 1, 0, -1):
+        if os.path.exists(os.path.join(log_directory, f"log_{i}.log")):
+            os.rename(os.path.join(log_directory, f"log_{i}.log"), os.path.join(log_directory, f"log_{i+1}.log"))
+
+    # Rename current log to log_1.log
+    if os.path.exists(os.path.join(log_directory, "log.log")):
+        os.rename(os.path.join(log_directory, "log.log"), os.path.join(log_directory, "log_1.log"))
+
+def log(message):
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    log_directory = os.path.join(script_dir, 'logs')
+    
+    # Rotate logs if necessary
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+    rotate_logs(log_directory)
+
+    # Write to current log file
+    with open(os.path.join(log_directory, "log.log"), "a") as log_file:
+        log_file.write(f"{datetime.now().isoformat()} - {message}\n")
 
 def capture_image(resolution_choice, num_photos, time_delay, image_format):
     # Initialize the camera
