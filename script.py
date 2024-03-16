@@ -102,10 +102,31 @@ def get_resolution_choice():
             print("Invalid resolution choice. Please enter '1' or '2'.")
 
 def main():
-    # Get the number of photos, waiting time, resolution, and image format
-    num_photos = int(input("Enter the number of photos you want to take: "))
+    while True:
+        # Get the number of photos
+        num_photos = int(input("Enter the number of photos you want to take (maximum 10): "))
+        
+        # Check if the number of photos exceeds the maximum limit
+        if num_photos > 10:
+            print("Error: Number of photos exceeds the maximum limit of 10. Please enter a valid number.")
+        else:
+            break  # Exit the loop if the number is valid
+        
+    # Get resolution choice from user
     resolution_choice = get_resolution_choice()
-    time_delay = float(input("Enter the wait time in seconds between photos: "))
+    
+    # Get the waiting time between photos
+    while True:
+        # Get the waiting time between photos
+        time_delay = float(input("Enter the wait time in seconds between photos (maximum 5 seconds): "))
+        
+        # Check if the time delay exceeds the maximum limit
+        if time_delay > 5:
+            print("Error: Time delay exceeds the maximum limit of 5 seconds. Please enter a valid time.")
+        else:
+            break  # Exit the loop if the time delay is valid
+    
+    # Get the image format
     image_format = input("Enter the image format (jpg or pdf): ").lower()
 
     # Validate the image format
